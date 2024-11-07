@@ -9,7 +9,7 @@ function Header() {
     <nav className="navbar navbar-expand-lg App-bg">
       <div className="px-2 d-flex align-items-center">
         <img src={logo} className="App-logo navbar-brand" alt="logo" />
-        <span className="fw-bolder navbar-brand text-white text-uppercase">Warhammer Dice Roller</span>
+        <span className="fw-bolder navbar-brand text-white text-uppercase ">Warhammer Dice Roller</span>
       </div>
     </nav>
   );
@@ -18,9 +18,10 @@ function Header() {
 function Body() {
   const [attacks, setAttacks] = useState(1);
   const [hit, setHits] = useState(4);
-  const [strength, setStrength] = useState(4);
-  const [toughness, setToughness] = useState(3);
-  const [result, setResult] = useState('');
+  const [strength, setStrength] = useState(1);
+  const [toughness, setToughness] = useState(1);
+  const [result, setResult] = useState('<button class="btn"><img src=' + logo + ' class="App-logo-fast navbar-brand" alt="logo" /></button>');
+  const [models, setModels] = useState(1);
 
   function handleAttacksChange(e) {
     setAttacks(e.target.value);
@@ -37,22 +38,28 @@ function Body() {
   function handleToughnessChange(e) {
     setToughness(e.target.value);
   }
+
+  function handleModelsChange(e) {
+    setModels(e.target.value);
+  }
+
   function handleReset(e) {
 
     e.preventDefault();
 
-    setAttacks('');
-    setHits('');
-    setResult('');
-    setStrength('');
-    setToughness('');
+    setAttacks(1);
+    setHits(4);
+    setResult('<button class="btn"><img src=' + logo + ' class="App-logo-fast navbar-brand" alt="logo" /></button>');
+    setStrength(1);
+    setToughness(1);
+    setModels(1);
   }
 
   async function handleRoll(e) {
     e.preventDefault();
     try {
       let res;
-      res = await calculateRoll(parseInt(attacks), parseInt(hit), parseInt(strength), parseInt(toughness));
+      res = await calculateRoll(parseInt(attacks), parseInt(hit), parseInt(strength), parseInt(toughness), parseInt(models));
 
       setResult(res);
     } catch (err) {
@@ -61,9 +68,33 @@ function Body() {
   }
 
   return (
-    <div className="text-center m-5">
+    <div className="text-center mx-5 mt-4">
       <p className="fw-bold text-uppercase">Basic <span className="text-danger">Hit & Wound</span> roller</p>
       <form onSubmit={handleRoll} className="form">
+          <div className="row border rounded p-2">
+            <div className="d-flex aligne-items-center flex-column p-2">
+              <div className="d-flex justify-content-between">
+                <span className="fw-bold">Number of models attacking</span>
+                <input
+                  type="number"
+                  className="w-25 text-center form-control fw-bold"
+                  value={models}
+                  onChange={handleModelsChange}
+                />
+              </div>
+            </div>
+            <input
+              type="range"
+              min="1"
+              max="40"
+              step="1"
+              className="form-range p-2"
+
+              value={models}
+              onChange={handleModelsChange}
+
+            />
+          </div>
           <div className="row border rounded p-2">
             <div className="d-flex aligne-items-center flex-column p-2">
               <div className="d-flex justify-content-between">
@@ -79,7 +110,7 @@ function Body() {
             <input
               type="range"
               min="1"
-              max="100"
+              max="20"
               step="1"
               className="form-range p-2"
               placeholder="Attacks"
@@ -154,15 +185,21 @@ function Body() {
           </div>
         {/*le reste*/}
 
-        <div className="pt-5">
-          <span >{attacks} attaque(s) qui toucheront sur {hit}+</span><br/><br/>
+        <div className="p-2">
+          <span >{attacks * models} attaque(s) sur {hit}+</span><br/>
+          <span> Blessures sur {setWoundTarget(strength, toughness)}+</span>
         </div>
 
-        <button className="btn btn-primary">Roll</button>&nbsp;
-        <button className="btn btn-danger" onClick={handleReset}>Reset</button>
-        <div className="text-wrap pt-4" dangerouslySetInnerHTML={{__html: result}}>
+        <div className="mx-5">
+          <div className="d-flex justify-content-between mx-5">
+            <button className="btn btn-primary">Roll</button>
+            <button className="btn btn-danger" onClick={handleReset}>Reset</button>
+          </div>
+        </div>
+        <div className="text-wrap pb-4 m-4" dangerouslySetInnerHTML={{__html: result}}>
 
         </div>
+        <br/>
       </form>
     </div>
   );
@@ -177,10 +214,10 @@ function Footer() {
     </footer>
   );
 }
-function calculateRoll(attacks, hit, strength, toughness) {
+function calculateRoll(attacks, hit, strength, toughness, models) {
   let returnString = 'Aucune info pour faire le jet <br><a href="https://perdu.com" target="_blank">Se retrouver</a>';
   if (attacks > 0 && hit > 0) {
-    let diceRolls = attacks;
+    let diceRolls = attacks*models;
     let successes = 0;
     let rolls = [];
     while (diceRolls > 0) {
@@ -194,27 +231,10 @@ function calculateRoll(attacks, hit, strength, toughness) {
     }
     if (successes > 0 && strength > 0 && toughness > 0) {
       let woundRolls = successes;
-      let woundTarget = 0;
+      let woundTarget = setWoundTarget(strength, toughness);
       let woundResults = [];
       let woundSuccesses = 0;
 
-      switch (true) {
-        case (parseInt(strength) === parseInt(toughness)):
-          woundTarget = 4;
-          break;
-        case (parseInt(strength) >= parseInt(toughness) * 2):
-          woundTarget = 2;
-          break;
-        case (parseInt(strength) > parseInt(toughness)):
-          woundTarget = 3;
-          break;
-        case (parseInt(strength) <= parseInt(toughness) / 2):
-          woundTarget = 6;
-          break;
-        case (parseInt(strength) < parseInt(toughness)):
-          woundTarget = 5;
-          break;
-      }
       while (woundRolls > 0) {
         let diceRoll = rollDice(1,6);
         woundResults.push(diceRoll);
@@ -224,82 +244,19 @@ function calculateRoll(attacks, hit, strength, toughness) {
         }
         woundRolls -= 1;
       }
-      rolls.forEach((element, index, array) => {
-        switch (true) {
-          case (element === 1):
-            array[index] = '<span class="text-danger fw-bold">' + element + "</span>";
-            break;
-          case (element < hit):
-            array[index] = '<span class="text-warning fw-bold">' + element + "</span>";
-            break;
-          case (element === 6):
-            array[index] = '<span class="text-success fw-bold">' + element + "</span>";
-            break;
-          case (element >= hit):
-            array[index] = '<span class="text-info fw-bold">' + element + "</span>";
-            break;
-        }
-      })
-      let stringRolls = rolls.join(', ');
-      woundResults.forEach((element, index, array) => {
-        switch (true) {
-          case (element === 1):
-            array[index] = '<span class="text-danger fw-bold">' + element + "</span>";
-            break;
-          case (element < woundTarget):
-            array[index] = '<span class="text-warning fw-bold">' + element + "</span>";
-            break;
-          case (element === 6):
-            array[index] = '<span class="text-success fw-bold">' + element + "</span>";
-            break;
-          case (element >= woundTarget):
-            array[index] = '<span class="text-info fw-bold">' + element + "</span>";
-            break;
-        }
-      })
-      let stringWoundResults = woundResults.join(', ');
+
+      let stringRolls = setHitDiceColors(rolls, hit).join(', ');
+      let stringWoundResults = setWoundDiceColors(woundResults, woundTarget).join(', ');
       returnString = '<b>'+ attacks + ' attaques sur ' + hit + '+</b><br>'+ successes + ' touches<br>Dés : ' + stringRolls +
         '<br>F ' + strength + ' vs E ' + toughness + ' = <b>blesse sur ' + woundTarget + '+</b><br>'
         + woundSuccesses + ' blessures<br>Dés : ' + stringWoundResults
       return returnString;
     } else if (successes === 0) {
-      rolls.forEach((element, index, array) => {
-        switch (true) {
-          case (element === 1):
-            array[index] = '<span class="text-danger fw-bold">' + element + "</span>";
-            break;
-          case (element < hit):
-            array[index] = '<span class="text-warning fw-bold">' + element + "</span>";
-            break;
-          case (element === 6):
-            array[index] = '<span class="text-success fw-bold">' + element + "</span>";
-            break;
-          case (element >= hit):
-            array[index] = '<span class="text-info fw-bold">' + element + "</span>";
-            break;
-        }
-      })
-      let stringRolls = rolls.join(', ');
+      let stringRolls = setHitDiceColors(rolls, hit).join(', ');
       returnString = '<b>'+ attacks + ' attaques sur ' + hit + '+</b><br>'+ successes + ' touches<br>Dés : ' + stringRolls;
       return returnString;
     } else {
-      rolls.forEach((element, index, array) => {
-        switch (true) {
-          case (element === 1):
-            array[index] = '<span class="text-danger fw-bold">' + element + "</span>";
-            break;
-          case (element < hit):
-            array[index] = '<span class="text-warning fw-bold">' + element + "</span>";
-            break;
-          case (element === 6):
-            array[index] = '<span class="text-success fw-bold">' + element + "</span>";
-            break;
-          case (element >= hit):
-            array[index] = '<span class="text-info fw-bold">' + element + "</span>";
-            break;
-        }
-      })
-      let stringRolls = rolls.join(', ');
+      let stringRolls = setHitDiceColors(rolls, hit).join(', ');
       returnString = '<b>'+ attacks
         + ' attaques sur ' +
          hit + '+</b><br>'+ successes
@@ -323,6 +280,61 @@ function rollDice(min, max) {
   }
 
   return min + (byteArray[0] % range);
+}
+
+function setWoundDiceColors(woundResults, woundTarget) {
+  woundResults.forEach((element, index, array) => {
+    switch (true) {
+      case (element === 1):
+        array[index] = '<span class="text-danger fw-bold">' + element + "</span>";
+        break;
+      case (element < woundTarget):
+        array[index] = '<span class="text-warning fw-bold">' + element + "</span>";
+        break;
+      case (element === 6):
+        array[index] = '<span class="text-success fw-bold">' + element + "</span>";
+        break;
+      case (element >= woundTarget):
+        array[index] = '<span class="text-info fw-bold">' + element + "</span>";
+        break;
+    }
+  })
+  return woundResults;
+}
+
+function setHitDiceColors(rolls, hit) {
+  rolls.forEach((element, index, array) => {
+    switch (true) {
+      case (element === 1):
+        array[index] = '<span class="text-danger fw-bold">' + element + "</span>";
+        break;
+      case (element < hit):
+        array[index] = '<span class="text-warning fw-bold">' + element + "</span>";
+        break;
+      case (element === 6):
+        array[index] = '<span class="text-success fw-bold">' + element + "</span>";
+        break;
+      case (element >= hit):
+        array[index] = '<span class="text-info fw-bold">' + element + "</span>";
+        break;
+    }
+  })
+  return rolls;
+}
+
+function setWoundTarget(strength, toughness) {
+  switch (true) {
+    case (parseInt(strength) === parseInt(toughness)):
+      return 4;
+    case (parseInt(strength) >= parseInt(toughness) * 2):
+      return 2;
+    case (parseInt(strength) > parseInt(toughness)):
+      return  3;
+    case (parseInt(strength) <= parseInt(toughness) / 2):
+      return  6;
+    case (parseInt(strength) < parseInt(toughness)):
+      return  5;
+  }
 }
 export default function Calculator() {
   return (
