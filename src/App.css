@@ -3,7 +3,7 @@
 }
 
 .App-logo {
-  height: 2rem;
+  height: 3rem;
   pointer-events: none;
 }
 
@@ -38,37 +38,6 @@
   }
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #282c34;
-  color: #fff;
-  padding: 1rem;
-}
-
-.navbar-left {
-  margin: 0;
-  /*position: absolute;*/
-  /*top: 50%;*/
-  /*transform: translateY(-50%);*/
-}
-
-.navbar-left .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #fff;
-  text-decoration: none;
-}
-
-.navbar-title {
-
-}
-
-.preline {
-  white-space: pre-line;
-}
-
-.footer {
+.App-bg {
   background-color: #282c34;
 }

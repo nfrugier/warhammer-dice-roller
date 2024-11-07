@@ -1,24 +1,25 @@
 import logo from './images/logo.svg';
 import './App.css';
 import {useState} from "react";
+import infoJson from './info.json';
 
 
 function Header() {
   return (
-    <nav className="navbar">
-      <div className="navbar-left">
-        <img src={logo} className="App-logo" alt="logo" />
-        &nbsp;Warhammer Dice Roller
+    <nav className="navbar navbar-expand-lg App-bg">
+      <div className="px-2 d-flex align-items-center">
+        <img src={logo} className="App-logo navbar-brand" alt="logo" />
+        <span className="fw-bolder navbar-brand text-white text-uppercase">Warhammer Dice Roller</span>
       </div>
     </nav>
   );
 }
 
 function Body() {
-  const [attacks, setAttacks] = useState(0);
-  const [hit, setHits] = useState(0);
-  const [strength, setStrength] = useState(0);
-  const [toughness, setToughness] = useState(0);
+  const [attacks, setAttacks] = useState(1);
+  const [hit, setHits] = useState(4);
+  const [strength, setStrength] = useState(4);
+  const [toughness, setToughness] = useState(3);
   const [result, setResult] = useState('');
 
   function handleAttacksChange(e) {
@@ -63,69 +64,100 @@ function Body() {
     <div className="text-center m-5">
       <p className="fw-bold text-uppercase">Basic <span className="text-danger">Hit & Wound</span> roller</p>
       <form onSubmit={handleRoll} className="form">
-          <div className="form-group">
-            <div className="input-group mb-3">
-              <div className="input-group-prepend">
-                <span className="input-group-text" id="attacks">Number of attacks</span>
+          <div className="row border rounded p-2">
+            <div className="d-flex aligne-items-center flex-column p-2">
+              <div className="d-flex justify-content-between">
+                <span className="fw-bold">Number of Attacks</span>
+                <input
+                  type="number"
+                  className="w-25 text-center form-control fw-bold"
+                  value={attacks}
+                  onChange={handleAttacksChange}
+                />
               </div>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="Attacks"
-                value={parseInt(attacks)}
-                onChange={handleAttacksChange}
-                aria-label="Attacks" aria-describedby="attacks"
-              />
             </div>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              step="1"
+              className="form-range p-2"
+              placeholder="Attacks"
+              value={attacks}
+              onChange={handleAttacksChange}
+              aria-label="Attacks" aria-describedby="attacks"
+            />
           </div>
-          <div className="form-group">
-            <div className="input-group mb-3">
-              <div className="input-group-prepend">
-                <span className="input-group-text" id="bsws">Weapon/Balistic Skill</span>
+          <div className="row rounded border p-2">
+            <div className="d-flex aligne-items-center flex-column p-2">
+              <div className="d-flex justify-content-between">
+                <span className="fw-bold" id="bsws">Weapon/Balistic Skill</span>
+                <span className="fw-bold">{hit}+</span>
               </div>
-              <input
-                type="number"
-                className="form-control"
-                placeholder="WS/BS"
-                value={parseInt(hit)}
-                onChange={handleHitsChange}
-                aria-label="WS/BS" aria-describedby="bsws"
-              />
             </div>
+            <input
+              type="range"
+              min="2"
+              max="6"
+              className="form-range"
+              placeholder="WS/BS"
+              value={hit}
+              onChange={handleHitsChange}
+              aria-label="WS/BS" aria-describedby="bsws"
+            />
           </div>
-          <div className="form-group">
-            <div className="input-group mb-3">
-              <div className="input-group-prepend">
-                <span className="input-group-text" id="strength">Weapon's Strength</span>
+          <div className="row rounded border p-2">
+            <div className="d-flex aligne-items-center flex-column p-2">
+              <div className="d-flex justify-content-between">
+                <span className="fw-bold" id="strength">Weapon's Strength</span>
+                <input
+                  type="number"
+                  className="w-25 text-center form-control fw-bold"
+                  value={strength}
+                  onChange={handleStrengthChange}
+                />
               </div>
-              <input
-              type="number"
-              className="form-control"
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="40"
+              className="form-range"
               placeholder="S"
-              value={parseInt(strength)}
+              value={strength}
               onChange={handleStrengthChange}
               aria-label="S" aria-describedby="strength"
             />
-            </div>
           </div>
-          <div className="form-group">
-            <div className="input-group mb-3">
-              <div className="input-group-prepend">
-                <span className="input-group-text" id="tough">Target's Toughness</span>
+          <div className="row rounded border p-2">
+            <div className="d-flex aligne-items-center flex-column p-2">
+              <div className="d-flex justify-content-between">
+                <span className="fw-bold" id="strength">Target's Toughness</span>
+                <input
+                  type="number"
+                  className="w-25 text-center form-control fw-bold"
+                  value={toughness}
+                  onChange={handleToughnessChange}
+                />
               </div>
-              <input
-              type="number"
-              className="form-control"
-              placeholder="T"
-              value={parseInt(toughness)}
-              onChange={handleToughnessChange}
-              aria-label="T" aria-describedby="tough"
-            />
             </div>
+            <input
+              type="range"
+              min="0"
+              max="40"
+              className="form-range"
+              placeholder="T"
+              value={toughness}
+              onChange={handleToughnessChange}
+              aria-label="S" aria-describedby="strength"
+            />
           </div>
         {/*le reste*/}
 
-        <span>{parseInt(attacks)} attaque(s) qui toucheront sur {parseInt(hit)}+</span><br/><br/>
+        <div className="pt-5">
+          <span >{attacks} attaque(s) qui toucheront sur {hit}+</span><br/><br/>
+        </div>
+
         <button className="btn btn-primary">Roll</button>&nbsp;
         <button className="btn btn-danger" onClick={handleReset}>Reset</button>
         <div className="text-wrap pt-4" dangerouslySetInnerHTML={{__html: result}}>
@@ -138,9 +170,9 @@ function Body() {
 
 function Footer() {
   return (
-    <footer className="fixed-bottom d-flex flex-column flex-sm-row justify-content-between align-items-bottom footer border-top py-2 ">
+    <footer className="fixed-bottom d-flex flex-column flex-sm-row justify-content-between align-items-bottom App-bg border-top py-2 ">
       <div>
-        <span className="fw-bold text-white align-text-bottom">WDRX v0.1.4 by <a href="https://github.com/nfrugier" target="_blank">Thrandal</a></span>
+        <span className="fw-bold text-white align-text-bottom">WDRX v{infoJson.version} by <a href={infoJson.website} target="_blank">{infoJson.dev}</a></span>
       </div>
     </footer>
   );
